@@ -1,0 +1,18 @@
+{
+  "template": "https://github.com/slangenbach/cookiecutter-python-uv",
+  "commit": "2dc5d8c7875232759001f26e38f9fc1f9f84fba4",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "project_name": "dbtbnb",
+      "project_description": "Learning DBT by transforming Airbnb data",
+      "project_slug": "dbtbnb",
+      "package_name": "dbtbnb",
+      "author": "Stefan Langenbach",
+      "email": "stefan@langenbach.online",
+      "_template": "https://github.com/slangenbach/cookiecutter-python-uv",
+      "_commit": "2dc5d8c7875232759001f26e38f9fc1f9f84fba4"
+    }
+  },
+  "directory": null
+}
