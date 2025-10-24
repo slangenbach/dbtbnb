@@ -2,6 +2,9 @@
 
 version: "3"
 
+includes:
+  sf: ./taskfiles/snowflake.yml
+
 tasks:
   init-git-repo:
     cmds:
@@ -17,6 +20,14 @@ tasks:
       - test -f .env
     internal: true
 
+  create-tfvars-file:
+    dir: infra
+    cmds:
+      - cp terraform.tfvars.example terraform.tfvars
+    status:
+      - test -f terraform.tfvars
+    internal: true
+
   create-data-dir:
     cmds:
       - mkdir -p data
@@ -28,6 +39,7 @@ tasks:
     cmds:
       - task: init-git-repo
       - task: create-env-file
+      - task: create-tfvars-file
       - task: create-data-dir
       - uv sync --all-groups --all-extras
       - uv run pre-commit install

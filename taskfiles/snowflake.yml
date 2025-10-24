@@ -1,0 +1,24 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  create-keypair:
+    cmds:
+      - openssl genrsa 2048 | openssl pkcs8 -topk8 -inform PEM -out sf_key.p8 -nocrypt
+      - openssl rsa -in sf_key.p8 -pubout -out sf_key.pub
+    status:
+      - test -f sf_key.p8
+      - test -f sf_key.pub
+    desc: Create key pair for authentication in Snowflake
+
+  create-tf-user:
+    dir: infra/scripts/
+    cmd: |
+      snow sql \
+        --filename create_terraform_user.sql \
+        --variable PUBLIC_KEY={{.PUBLIC_KEY}}
+    requires:
+      vars:
+        - name: PUBLIC_KEY
+    desc: Create Terraform service user in Snowflake
