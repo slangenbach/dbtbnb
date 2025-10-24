@@ -3,7 +3,7 @@
 version: "3"
 
 includes:
-  sf: ./taskfiles/snowflake.yml
+  sf: ./taskfiles/sf.yml
 
 tasks:
   init-git-repo:

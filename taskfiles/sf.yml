@@ -1,0 +1,50 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  create-keypair:
+    cmds:
+      - openssl genrsa 2048 | openssl pkcs8 -topk8 -inform PEM -out sf_key.p8 -nocrypt
+      - openssl rsa -in sf_key.p8 -pubout -out sf_key.pub
+    status:
+      - test -f sf_key.p8
+      - test -f sf_key.pub
+    desc: Create key pair for authentication in Snowflake
+
+  create-tf-user:
+    dir: infra/scripts/
+    cmd: |
+      snow sql \
+        --filename create_terraform_user.sql \
+        --variable PUBLIC_KEY={{.PUBLIC_KEY}}
+    requires:
+      vars:
+        - name: PUBLIC_KEY
+    desc: Create Terraform service user in Snowflake
+
+  copy-raw-data:
+    dir: infra/scripts
+    cmd: |
+      snow sql \
+        --filename copy_raw_data.sql \
+        --variable DB_NAME={{.DB_NAME}} \
+        --variable SCHEMA_NAME={{.SCHEMA_NAME}} \
+        --variable STAGE_NAME={{.STAGE_NAME}} \
+        --variable TABLE_NAME={{.TABLE_NAME}} \
+        --variable FILE_NAME={{.FILE_NAME}} \
+        --variable FILE_FORMAT={{.FILE_FORMAT}}
+    requires:
+      vars:
+        - name: TABLE_NAME
+        - name: FILE_NAME
+    vars:
+      DB_NAME:
+        sh: terraform output -json | jq -r .db_name.value
+      SCHEMA_NAME:
+        sh: terraform output -json | jq -r .raw_schema_name.value
+      STAGE_NAME:
+        sh: terraform output -json | jq -r .raw_stage_name.value
+      FILE_FORMAT:
+        sh: terraform output -json | jq -r .raw_file_format.value
+    desc: Copy raw data into Snowflake
