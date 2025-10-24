@@ -1,3 +1,7 @@
+locals {
+  raw_table_names = ["RAW_LISTINGS", "RAW_REVIEWS", "RAW_HOSTS"]
+}
+
 resource "snowflake_database" "db" {
   name = "AIRBNB"
 }
@@ -122,5 +126,36 @@ resource "snowflake_table" "raw_hosts" {
   column {
     name = "UPDATED_AT"
     type = "DATETIME"
+  }
+}
+
+resource "snowflake_file_format" "raw_csv" {
+  name                         = "csv"
+  database                     = snowflake_database.db.name
+  schema                       = snowflake_schema.raw.name
+  format_type                  = "CSV"
+  field_optionally_enclosed_by = "\""
+  skip_header                  = 1
+}
+
+resource "snowflake_stage" "raw_data" {
+  name     = "raw_data"
+  database = snowflake_database.db.name
+  schema   = snowflake_schema.raw.name
+  url      = "s3://dbt-datasets"
+  # https://registry.terraform.io/providers/snowflakedb/snowflake/latest/docs/resources/stage#file_format-2
+  file_format = "FORMAT_NAME = ${snowflake_file_format.raw_csv.fully_qualified_name}"
+}
+
+resource "snowflake_account_role" "transform" {
+  name = "transform"
+}
+
+resource "snowflake_grant_privileges_to_account_role" "operate" {
+  privileges        = ["OPERATE"]
+  account_role_name = snowflake_account_role.transform.name
+  on_account_object {
+    object_type = "WAREHOUSE"
+    object_name = "COMPUTE_WH"
   }
 }
