@@ -130,7 +130,7 @@ resource "snowflake_table" "raw_hosts" {
 }
 
 resource "snowflake_file_format" "raw_csv" {
-  name                         = "csv"
+  name                         = "RAW_CSV"
   database                     = snowflake_database.db.name
   schema                       = snowflake_schema.raw.name
   format_type                  = "CSV"
@@ -139,7 +139,7 @@ resource "snowflake_file_format" "raw_csv" {
 }
 
 resource "snowflake_stage" "raw_data" {
-  name     = "raw_data"
+  name     = "RAW_DATA"
   database = snowflake_database.db.name
   schema   = snowflake_schema.raw.name
   url      = "s3://dbt-datasets"

@@ -15,5 +15,5 @@ output "raw_stage_name" {
 
 output "raw_file_format" {
   description = "File format used to copy raw data"
-  value       = snowflake_file_format.raw_csv.fully_qualified_name
+  value       = snowflake_file_format.raw_csv.name
 }
