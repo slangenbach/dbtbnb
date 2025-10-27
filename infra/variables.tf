@@ -13,13 +13,12 @@ variable "sf_user" {
   type        = string
 }
 
-variable "sf_role" {
-  description = "Snowflake role"
-  type        = string
-  default     = "SYSADMIN"
-}
-
 variable "sf_private_key_path" {
   description = "Path to private key file to authenticate with Snowflake"
+  type        = string
+}
+
+variable "sf_public_key_path" {
+  description = "Path to public key file to authenticate with Snowflake"
   type        = string
 }

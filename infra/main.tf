@@ -147,15 +147,15 @@ resource "snowflake_stage" "raw_data" {
   file_format = "FORMAT_NAME = ${snowflake_file_format.raw_csv.fully_qualified_name}"
 }
 
-resource "snowflake_account_role" "transform" {
-  name = "transform"
-}
-
-resource "snowflake_grant_privileges_to_account_role" "operate" {
-  privileges        = ["OPERATE"]
-  account_role_name = snowflake_account_role.transform.name
-  on_account_object {
-    object_type = "WAREHOUSE"
-    object_name = "COMPUTE_WH"
-  }
+module "users" {
+  source              = "./modules/users"
+  sf_org              = var.sf_org
+  sf_account          = var.sf_account
+  sf_user             = var.sf_user
+  sf_private_key_path = var.sf_private_key_path
+  # TODO: Create and use key for users
+  user_public_key_path     = var.sf_public_key_path
+  default_db               = snowflake_database.db.name
+  dbt_default_namespace    = snowflake_schema.raw.fully_qualified_name
+  preset_default_namespace = snowflake_schema.dev.fully_qualified_name
 }
