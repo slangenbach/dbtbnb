@@ -18,8 +18,13 @@ variable "sf_private_key_path" {
   type        = string
 }
 
-variable "user_public_key_path" {
-  description = "Path to public key file to authenticate service users with Snowflake"
+variable "dbt_public_key_path" {
+  description = "Path to public key file to authenticate dbt service user with Snowflake"
+  type        = string
+}
+
+variable "preset_public_key_path" {
+  description = "Path to public key file to authenticate preset service user with Snowflake"
   type        = string
 }
 

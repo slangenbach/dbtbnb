@@ -4,12 +4,16 @@ version: "3"
 
 tasks:
   create-keypair:
+    dir: ~/.ssh
     cmds:
-      - openssl genrsa 2048 | openssl pkcs8 -topk8 -inform PEM -out sf_key.p8 -nocrypt
-      - openssl rsa -in sf_key.p8 -pubout -out sf_key.pub
+      - openssl genrsa 2048 | openssl pkcs8 -topk8 -v2 aes-256-cbc -inform PEM -out {{.KEY_NAME}}.p8 -nocrypt
+      - openssl rsa -in {{.KEY_NAME}}.p8 -pubout -out {{.KEY_NAME}}.pub
     status:
-      - test -f sf_key.p8
-      - test -f sf_key.pub
+      - test -f {{.KEY_NAME}}.p8
+      - test -f {{.KEY_NAME}}.pub
+    requires:
+      vars:
+        - name: KEY_NAME
     desc: Create key pair for authentication in Snowflake
 
   create-tf-user:

@@ -21,7 +21,7 @@ resource "snowflake_grant_privileges_to_account_role" "operate_to_transform" {
 resource "snowflake_service_user" "dbt" {
   name              = "dbt"
   login_name        = "dbt"
-  rsa_public_key    = file(var.user_public_key_path)
+  rsa_public_key    = file(var.dbt_public_key_path)
   default_role      = snowflake_account_role.transform.name
   default_warehouse = "COMPUTE_WH"
   default_namespace = var.dbt_default_namespace
@@ -97,7 +97,7 @@ resource "snowflake_account_role" "reporter" {
 resource "snowflake_service_user" "preset" {
   name              = "preset"
   login_name        = "preset"
-  rsa_public_key    = file(var.user_public_key_path)
+  rsa_public_key    = file(var.preset_public_key_path)
   default_role      = snowflake_account_role.reporter.name
   default_warehouse = "COMPUTE_WH"
   default_namespace = var.preset_default_namespace

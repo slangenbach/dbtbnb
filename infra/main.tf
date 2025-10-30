@@ -148,13 +148,13 @@ resource "snowflake_stage" "raw_data" {
 }
 
 module "users" {
-  source              = "./modules/users"
-  sf_org              = var.sf_org
-  sf_account          = var.sf_account
-  sf_user             = var.sf_user
-  sf_private_key_path = var.sf_private_key_path
-  # TODO: Create and use key for users
-  user_public_key_path     = var.sf_public_key_path
+  source                   = "./modules/users"
+  sf_org                   = var.sf_org
+  sf_account               = var.sf_account
+  sf_user                  = var.sf_user
+  sf_private_key_path      = var.sf_private_key_path
+  dbt_public_key_path      = var.dbt_public_key_path
+  preset_public_key_path   = var.preset_public_key_path
   default_db               = snowflake_database.db.name
   dbt_default_namespace    = snowflake_schema.raw.fully_qualified_name
   preset_default_namespace = snowflake_schema.dev.fully_qualified_name
