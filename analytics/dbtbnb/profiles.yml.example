@@ -1,0 +1,13 @@
+dbtbnb:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: SNOWFLAKE_ACCOUNT_NAME
+      user: dbt
+      role: TRANSFORM
+      private_key_path: FULL_PATH_TO_YOUR_PRIVATE_KEY
+      database: AIRBNB
+      schema: DEV
+      threads: 1
+      warehouse: COMPUTE_WH
