@@ -1,20 +1,23 @@
+locals {
+  transform_warehouse_privileges = ["USAGE", "OPERATE", "MODIFY", "MONITOR"]
+  transform_database_privileges  = ["USAGE", "CREATE SCHEMA", "MODIFY", "MONITOR"]
+  transform_schema_privileges    = ["USAGE", "CREATE TABLE", "CREATE VIEW", "MODIFY", "MONITOR"]
+
+  reporter_warehouse_privileges = ["USAGE", "OPERATE"]
+  reporter_database_privileges  = ["USAGE"]
+  reporter_schema_privileges    = ["USAGE"]
+
+  object_types = ["TABLES", "VIEWS"]
+}
+
 # Transform role
 resource "snowflake_account_role" "transform" {
   name = "TRANSFORM"
 }
 
-resource "snowflake_grant_account_role" "transform_to_security_admin" {
+resource "snowflake_grant_account_role" "transform_to_sysadmin" {
   role_name        = snowflake_account_role.transform.name
-  parent_role_name = "SECURITYADMIN"
-}
-
-resource "snowflake_grant_privileges_to_account_role" "operate_to_transform" {
-  privileges        = ["OPERATE"]
-  account_role_name = snowflake_account_role.transform.name
-  on_account_object {
-    object_type = "WAREHOUSE"
-    object_name = "COMPUTE_WH"
-  }
+  parent_role_name = "SYSADMIN"
 }
 
 # DBT user
@@ -33,8 +36,9 @@ resource "snowflake_grant_account_role" "transform_to_dbt" {
   user_name = snowflake_service_user.dbt.name
 }
 
-resource "snowflake_grant_privileges_to_account_role" "all_on_warehouse_to_transform" {
-  all_privileges    = true
+# Transform grants - Warehouse
+resource "snowflake_grant_privileges_to_account_role" "warehouse_to_transform" {
+  privileges        = local.transform_warehouse_privileges
   account_role_name = snowflake_account_role.transform.name
   on_account_object {
     object_type = "WAREHOUSE"
@@ -42,8 +46,9 @@ resource "snowflake_grant_privileges_to_account_role" "all_on_warehouse_to_trans
   }
 }
 
-resource "snowflake_grant_privileges_to_account_role" "all_on_db_to_transform" {
-  all_privileges    = true
+# Transform grants - Database
+resource "snowflake_grant_privileges_to_account_role" "database_to_transform" {
+  privileges        = local.transform_database_privileges
   account_role_name = snowflake_account_role.transform.name
   on_account_object {
     object_type = "DATABASE"
@@ -51,40 +56,48 @@ resource "snowflake_grant_privileges_to_account_role" "all_on_db_to_transform" {
   }
 }
 
-resource "snowflake_grant_privileges_to_account_role" "all_on_all_schemas_to_transform" {
-  all_privileges    = true
+# Transform grants - Schemas (all existing)
+resource "snowflake_grant_privileges_to_account_role" "schemas_to_transform" {
+  privileges        = local.transform_schema_privileges
   account_role_name = snowflake_account_role.transform.name
   on_schema {
     all_schemas_in_database = var.default_db
   }
 }
 
-resource "snowflake_grant_privileges_to_account_role" "all_on_future_schemas_to_transform" {
-  all_privileges    = true
+# Transform grants - Schemas (future)
+resource "snowflake_grant_privileges_to_account_role" "future_schemas_to_transform" {
+  privileges        = local.transform_schema_privileges
   account_role_name = snowflake_account_role.transform.name
   on_schema {
     future_schemas_in_database = var.default_db
   }
 }
 
-resource "snowflake_grant_privileges_to_account_role" "all_on_all_tables_to_transform" {
+# Transform grants - Objects (all existing)
+resource "snowflake_grant_privileges_to_account_role" "objects_to_transform" {
+  for_each = toset(local.object_types)
+
   all_privileges    = true
   account_role_name = snowflake_account_role.transform.name
   on_schema_object {
     all {
-      object_type_plural = "TABLES"
-      in_schema          = var.dbt_default_namespace
+      object_type_plural = each.value
+      in_database        = var.default_db
     }
   }
 }
 
-resource "snowflake_grant_privileges_to_account_role" "all_on_all_future_tables_to_transform" {
+# Transform grants - Objects (future)
+resource "snowflake_grant_privileges_to_account_role" "future_objects_to_transform" {
+  for_each = toset(local.object_types)
+
   all_privileges    = true
   account_role_name = snowflake_account_role.transform.name
   on_schema_object {
     future {
-      object_type_plural = "TABLES"
-      in_schema          = var.dbt_default_namespace
+      object_type_plural = each.value
+      in_database        = var.default_db
     }
   }
 }
@@ -109,13 +122,14 @@ resource "snowflake_grant_account_role" "reporter_to_preset" {
   user_name = snowflake_service_user.preset.name
 }
 
-resource "snowflake_grant_account_role" "reporter_to_security_admin" {
+resource "snowflake_grant_account_role" "reporter_to_sysadmin" {
   role_name        = snowflake_account_role.reporter.name
-  parent_role_name = "SECURITYADMIN"
+  parent_role_name = "SYSADMIN"
 }
 
-resource "snowflake_grant_privileges_to_account_role" "all_on_wh_to_reporter" {
-  all_privileges    = true
+# Reporter grants - Warehouse
+resource "snowflake_grant_privileges_to_account_role" "warehouse_to_reporter" {
+  privileges        = local.reporter_warehouse_privileges
   account_role_name = snowflake_account_role.reporter.name
   on_account_object {
     object_type = "WAREHOUSE"
@@ -123,8 +137,9 @@ resource "snowflake_grant_privileges_to_account_role" "all_on_wh_to_reporter" {
   }
 }
 
-resource "snowflake_grant_privileges_to_account_role" "usage_on_db_to_reporter" {
-  privileges        = ["USAGE"]
+# Reporter grants - Database
+resource "snowflake_grant_privileges_to_account_role" "database_to_reporter" {
+  privileges        = local.reporter_database_privileges
   account_role_name = snowflake_account_role.reporter.name
   on_account_object {
     object_type = "DATABASE"
@@ -132,40 +147,48 @@ resource "snowflake_grant_privileges_to_account_role" "usage_on_db_to_reporter" 
   }
 }
 
-resource "snowflake_grant_privileges_to_account_role" "usage_on_all_schemas_to_reporter" {
-  privileges        = ["USAGE"]
+# Reporter grants - Schemas (all existing)
+resource "snowflake_grant_privileges_to_account_role" "schemas_to_reporter" {
+  privileges        = local.reporter_schema_privileges
   account_role_name = snowflake_account_role.reporter.name
   on_schema {
     all_schemas_in_database = var.default_db
   }
 }
 
-resource "snowflake_grant_privileges_to_account_role" "usage_on_future_schemas_to_reporter" {
-  privileges        = ["USAGE"]
+# Reporter grants - Schemas (future)
+resource "snowflake_grant_privileges_to_account_role" "future_schemas_to_reporter" {
+  privileges        = local.reporter_schema_privileges
   account_role_name = snowflake_account_role.reporter.name
   on_schema {
     future_schemas_in_database = var.default_db
   }
 }
 
-resource "snowflake_grant_privileges_to_account_role" "select_on_all_tables_to_reporter" {
+# Reporter grants - Objects (all existing)
+resource "snowflake_grant_privileges_to_account_role" "objects_to_reporter" {
+  for_each = toset(local.object_types)
+
   privileges        = ["SELECT"]
   account_role_name = snowflake_account_role.reporter.name
   on_schema_object {
     all {
-      object_type_plural = "TABLES"
-      in_schema          = var.preset_default_namespace
+      object_type_plural = each.value
+      in_database        = var.default_db
     }
   }
 }
 
-resource "snowflake_grant_privileges_to_account_role" "select_on_all_future_tables_to_reporter" {
+# Reporter grants - Objects (future)
+resource "snowflake_grant_privileges_to_account_role" "future_objects_to_reporter" {
+  for_each = toset(local.object_types)
+
   privileges        = ["SELECT"]
   account_role_name = snowflake_account_role.reporter.name
   on_schema_object {
     future {
-      object_type_plural = "TABLES"
-      in_schema          = var.preset_default_namespace
+      object_type_plural = each.value
+      in_database        = var.default_db
     }
   }
 }
