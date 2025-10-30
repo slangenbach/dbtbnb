@@ -1,48 +1,6 @@
 # This file is maintained automatically by "terraform init".
 # Manual edits may be lost in future updates.
 
-provider "registry.terraform.io/dbt-labs/dbtcloud" {
-  version     = "1.3.0"
-  constraints = "~> 1.0"
-  hashes = [
-    "h1:t1pNp1exAjFXf8ovebsD3GwZ3vCC+tdwPSyy5li+ueA=",
-    "zh:084c9b84685d8e1d9d46eb7e1e9d82b45b4cceb8ae233a0a24ff97b545fdd540",
-    "zh:2ad7ccc1587323cf31f8cbc999d2993310e35c5bca88d75ceeaef6e032b7dc17",
-    "zh:3275342d2b6128b8f50fc6abeb3e267bbc35d0c0ef56065fec34483771726442",
-    "zh:369d467b451d848710f9c2b5059afd2e860243d475f4423db8e3cb39d2bed7ab",
-    "zh:41d595ee75946bf009f997a141c53e2fdaa24dc1d451aeebe3acc1a403629d76",
-    "zh:5dccf653e3c7d0185ae96ab77f292e3e6ee7a6facd19de9e14bdc910f6d0ec63",
-    "zh:5ee3e4cc028f4b51bcf2eddecde020f364862929fe773f31e7b8758a2f1d789b",
-    "zh:7085f53ed947aec4ff66f2c93b89bf5246e752a86f8272c070deb5acf64d8965",
-    "zh:8c215d812f449d227e9b8adb2a511124afd5f0a0c4ff428492e44c855345e549",
-    "zh:8da0a85d527f7d44141e72cb52e637a50117a623545efea93b70ba70b6fd9d35",
-    "zh:9b7c7a6deab3115f4f0b4f9a2fe4a3f2e4732c19d094d24c1104b5447f850349",
-    "zh:b096366cc30c4d006f2f8caedefa64d693eba7a33d6cf25e07d0829cfc839961",
-    "zh:c848fa337e22b1953050784b01f56bfc76043516b107ee8cfba51aebca1174a8",
-    "zh:ce6a12d19dac844312505855522d9aa641e595297deece939076df0be398222b",
-  ]
-}
-
-provider "registry.terraform.io/hashicorp/tls" {
-  version     = "4.1.0"
-  constraints = "4.1.0"
-  hashes = [
-    "h1:zEv9tY1KR5vaLSyp2lkrucNJ+Vq3c+sTFK9GyQGLtFs=",
-    "zh:14c35d89307988c835a7f8e26f1b83ce771e5f9b41e407f86a644c0152089ac2",
-    "zh:2fb9fe7a8b5afdbd3e903acb6776ef1be3f2e587fb236a8c60f11a9fa165faa8",
-    "zh:35808142ef850c0c60dd93dc06b95c747720ed2c40c89031781165f0c2baa2fc",
-    "zh:35b5dc95bc75f0b3b9c5ce54d4d7600c1ebc96fbb8dfca174536e8bf103c8cdc",
-    "zh:38aa27c6a6c98f1712aa5cc30011884dc4b128b4073a4a27883374bfa3ec9fac",
-    "zh:51fb247e3a2e88f0047cb97bb9df7c228254a3b3021c5534e4563b4007e6f882",
-    "zh:62b981ce491e38d892ba6364d1d0cdaadcee37cc218590e07b310b1dfa34be2d",
-    "zh:bc8e47efc611924a79f947ce072a9ad698f311d4a60d0b4dfff6758c912b7298",
-    "zh:c149508bd131765d1bc085c75a870abb314ff5a6d7f5ac1035a8892d686b6297",
-    "zh:d38d40783503d278b63858978d40e07ac48123a2925e1a6b47e62179c046f87a",
-    "zh:f569b65999264a9416862bca5cd2a6177d94ccb0424f3a4ef424428912b9cb3c",
-    "zh:fb07f708e3316615f6d218cec198504984c0ce7000b9f1eebff7516e384f4b54",
-  ]
-}
-
 provider "registry.terraform.io/snowflakedb/snowflake" {
   version     = "2.9.0"
   constraints = "2.9.0"
