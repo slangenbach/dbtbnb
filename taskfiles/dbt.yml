@@ -10,3 +10,27 @@ tasks:
     status:
       - test -f full_moon_dates.csv
     desc: Download CSV file with full moon dates
+
+  debug:
+    dir: analytics/dbtbnb
+    cmds:
+      - uv run dbt debug
+    desc: Debug dbt models
+
+  compile:
+    dir: analytics/dbtbnb
+    cmds:
+      - uv run dbt compile
+    desc: Compile dbt models
+
+  run:
+    dir: analytics/dbtbnb
+    cmds:
+      - uv run dbt run
+    desc: Run dbt models
+
+  check-freshness:
+    dir: analytics/dbtbnb
+    cmds:
+      - uv run dbt source freshness
+    desc: Check freshness of source tables
