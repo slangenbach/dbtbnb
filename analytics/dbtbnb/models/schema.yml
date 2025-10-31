@@ -1,0 +1,25 @@
+models:
+  - name: dim_listings_cleansed
+    columns:
+      - name: LISTING_ID
+        data_tests:
+          - unique
+          - not_null
+
+      - name: HOST_ID
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                field: HOST_ID
+                to: ref('dim_hosts_cleansed')
+
+      - name: ROOM_TYPE
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - Entire home/apt
+                  - Private room
+                  - Shared room
+                  - Hotel room
