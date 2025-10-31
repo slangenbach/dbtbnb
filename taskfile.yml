@@ -4,6 +4,7 @@ version: "3"
 
 includes:
   sf: ./taskfiles/sf.yml
+  dbt: ./taskfiles/dbt.yml
 
 tasks:
   init-git-repo:
@@ -50,6 +51,7 @@ tasks:
       - task: create-tfvars-file
       - task: create-dbt-profile-file
       - task: create-data-dir
+      - task: dbt:get-seed-file
       - uv sync --all-groups --all-extras
       - uv run pre-commit install
     desc: "Setup development environment"

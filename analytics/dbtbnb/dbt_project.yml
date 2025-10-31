@@ -35,3 +35,5 @@ models:
       +materialized: ephemeral
     dim:
       +materialized: table
+    mart:
+      +materialized: table
