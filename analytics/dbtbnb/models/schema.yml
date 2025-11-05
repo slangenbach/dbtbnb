@@ -37,6 +37,8 @@ models:
         data_type: timestamp
       - name: MINIMUM_NIGHTS
         data_type: number
+        data_tests:
+          - positive_value_only
 
   - name: dim_hosts_cleansed
     config:
@@ -53,3 +55,15 @@ models:
         data_type: timestamp
       - name: HOST_NAME
         data_type: string
+
+  - name: fct_reviews
+    data_tests:
+      - min_row_count:
+          arguments:
+            row_count: 1000
+
+  - name: mart_full_moon_reviews
+    data_tests:
+      - min_row_count:
+          arguments:
+            row_count: 1000
