@@ -1,20 +1,18 @@
 models:
   - name: dim_listings_cleansed
+    config:
+      contract:
+        enforced: true
     columns:
       - name: LISTING_ID
+        data_type: string
         data_tests:
           - unique
           - not_null
-
-      - name: HOST_ID
-        data_tests:
-          - not_null
-          - relationships:
-              arguments:
-                field: HOST_ID
-                to: ref('dim_hosts_cleansed')
-
+      - name: LISTING_NAME
+        data_type: string
       - name: ROOM_TYPE
+        data_type: string
         data_tests:
           - accepted_values:
               arguments:
@@ -23,3 +21,35 @@ models:
                   - Private room
                   - Shared room
                   - Hotel room
+      - name: HOST_ID
+        data_type: number
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                field: HOST_ID
+                to: ref('dim_hosts_cleansed')
+      - name: PRICE
+        data_type: number
+      - name: CREATED_AT
+        data_type: timestamp
+      - name: UPDATED_AT
+        data_type: timestamp
+      - name: MINIMUM_NIGHTS
+        data_type: number
+
+  - name: dim_hosts_cleansed
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: HOST_ID
+        data_type: integer
+      - name: IS_SUPERHOST
+        data_type: string
+      - name: CREATED_AT
+        data_type: timestamp
+      - name: UPDATED_AT
+        data_type: timestamp
+      - name: HOST_NAME
+        data_type: string
