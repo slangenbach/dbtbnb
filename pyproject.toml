@@ -74,7 +74,7 @@ fail_under = 0
 [tool.sqlfluff.core]
 templater = "dbt"
 dialect = "snowflake"
-max_line_length = 100
+max_line_length = 120
 
 [tool.sqlfluff.templater.dbt]
 project_dir = "analytics/dbtbnb"
