@@ -54,17 +54,23 @@ tasks:
       - task: dbt:get-seed-file
       - uv sync --all-groups --all-extras
       - uv run pre-commit install
-    desc: "Setup development environment"
+    desc: Setup development environment
+
+  setup-ci:
+    cmds:
+      - uv sync --all-groups --all-extras
+      - uv run pre-commit install
+    desc: Setup CI environment
 
   lint:
     cmds:
       - uv run pre-commit run --all-files
-    desc: "Run linters"
+    desc: Run linters
 
   test:
     cmds:
       - uv run pytest
-    desc: "Run tests"
+    desc: Run tests
 
   bump-version:
     cmds:
@@ -74,4 +80,4 @@ tasks:
       vars:
         - name: BUMP
           enum: [patch, minor, major]
-    desc: "Bump project version"
+    desc: Bump project version
