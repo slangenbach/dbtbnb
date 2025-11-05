@@ -1,19 +1,17 @@
 WITH
 fct_reviews AS (
-  SELECT * FROM {{ ref("fct_reviews") }}
+    SELECT * FROM {{ ref("fct_reviews") }}
 ),
+
 full_moon_dates AS (
-  SELECT * FROM {{ ref("seed_full_moon_dates") }}
+    SELECT * FROM {{ ref("seed_full_moon_dates") }}
 )
 
 SELECT
     r.*,
-    CASE
-        WHEN fm.full_moon_date IS NULL THEN false
-        ELSE true
-    END AS is_full_moon
+    NOT coalesce(fm.full_moon_date IS NULL, FALSE) AS is_full_moon
 FROM
-    fct_reviews r
+    fct_reviews AS r
 LEFT JOIN
-    full_moon_dates fm
-ON TO_DATE(r.review_date) = DATEADD(DAY, 1, fm.full_moon_date)
+    full_moon_dates AS fm
+    ON to_date(r.review_date) = dateadd(DAY, 1, fm.full_moon_date)

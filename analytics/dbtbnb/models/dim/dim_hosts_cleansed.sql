@@ -6,11 +6,12 @@
 WITH src_hosts AS (
     SELECT * FROM {{ ref("src_hosts") }}
 )
+
 SELECT
-    HOST_ID,
-    IFNULL(HOST_NAME, 'Anonymous') AS HOST_NAME,
-    IS_SUPERHOST,
-    CREATED_AT,
-    UPDATED_AT
+    host_id,
+    is_superhost,
+    created_at,
+    updated_at,
+    COALESCE(host_name, 'Anonymous') AS host_name
 FROM
     src_hosts

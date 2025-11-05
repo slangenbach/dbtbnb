@@ -72,11 +72,13 @@ source = ["src"]
 fail_under = 0
 
 [tool.sqlfluff.core]
+templater = "dbt"
 dialect = "snowflake"
 max_line_length = 100
 
 [tool.sqlfluff.templater.dbt]
 project_dir = "analytics/dbtbnb"
+profiles_dir = "analytics/dbtbnb"
 
 [build-system]
 requires = ["uv_build>=0.9.4,<0.10.0"]
