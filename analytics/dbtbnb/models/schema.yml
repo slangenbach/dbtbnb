@@ -1,5 +1,6 @@
 models:
   - name: dim_listings_cleansed
+    description: "Cleansed listing data from Airbnb"
     config:
       contract:
         enforced: true
@@ -41,6 +42,7 @@ models:
           - positive_value_only
 
   - name: dim_hosts_cleansed
+    description: "Cleansed host data from Airbnb"
     config:
       contract:
         enforced: true
@@ -56,13 +58,18 @@ models:
       - name: HOST_NAME
         data_type: string
 
+  - name: dim_listings_with_hosts
+    description: "Cleansed listing and host data from Airbnb"
+
   - name: fct_reviews
+    description: "Fact table for reviews"
     data_tests:
       - min_row_count:
           arguments:
             row_count: 1000
 
   - name: mart_full_moon_reviews
+    description: "Mart for full moon reviews"
     data_tests:
       - min_row_count:
           arguments:
