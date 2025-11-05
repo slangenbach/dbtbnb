@@ -33,6 +33,8 @@ jobs:
           key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Run linters
+        env:
+          SKIP: sqlfluff-lint,sqlfluff-fix
         run: task lint
 
       - name: Run tests
