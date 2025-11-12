@@ -1,0 +1,14 @@
+version: 2
+
+exposures:
+  - name: dbtbnb_dashboard
+    label: "DBTBNB Insights Dashboard"
+    type: dashboard
+    maturity: low
+    url: https://ea96d881.us1a.app.preset.io/superset/dashboard/p/16QlqKkqVkP/
+    description: Insights into DBTBNB specifics
+    depends_on:
+      - ref("dim_listings_with_hosts")
+      - ref("mart_full_moon_reviews")
+    owner:
+      name: Jane Doe
