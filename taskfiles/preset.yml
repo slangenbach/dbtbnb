@@ -1,0 +1,34 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  get-connection-string:
+    dir: infra
+    cmds:
+      - echo "snowflake://{{.PRESET_USER}}@{{.SF_ACCOUNT}}/{{.SF_DB_NAME}}?role={{.PRESET_ROLE}}&warehouse={{.SF_WAREHOUSE}}"
+    vars:
+      PRESET_USER:
+        sh: terraform output -json | jq -r .preset_user.value
+      SF_ACCOUNT:
+        sh: terraform output -json | jq -r .sf_account.value
+      SF_DB_NAME:
+        sh: terraform output -json | jq -r .db_name.value
+      PRESET_ROLE:
+        sh: terraform output -json | jq -r .preset_role.value
+      SF_WAREHOUSE: COMPUTE_WH
+    desc: Get Preset connection string to connect to Snowflake
+
+  get-auth-snippet:
+    dir: infra
+    cmds:
+      - |
+        jq \
+          --null-input \
+          --arg key "$(cat {{.KEY}})" \
+          --arg phrase "{{.PHRASE}}" \
+          "{auth_method: \"keypair\", \"auth_params\": {\"privatekey_body\": \$key, \"privatekey_pass\": \$phrase}}"
+    vars:
+      KEY:
+        sh: terraform output -json | jq -r .preset_private_key_path.value
+    desc: Generate auth JSON for Preset
