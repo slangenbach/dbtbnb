@@ -6,7 +6,7 @@ includes:
   sf: ./taskfiles/sf.yml
   dbt: ./taskfiles/dbt.yml
   preset: ./taskfiles/preset.yml
-  dagster: ./taskfiles/dagster.yml
+  dev: ./taskfiles/dev.yml
 
 tasks:
   init-git-repo:

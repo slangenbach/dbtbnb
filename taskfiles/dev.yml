@@ -1,0 +1,14 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  start-ui:
+    cmds:
+      - uv run streamlit run ./src/dbtbnb/ui/app.py
+    desc: Start UI
+
+  start-orchestrator:
+    cmds:
+      - uv run dagster dev
+    desc: Start orchestrator
