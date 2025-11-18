@@ -8,7 +8,7 @@ tasks:
     cmds:
       - curl -o seed_full_moon_dates.csv https://dbtlearn.s3.us-east-2.amazonaws.com/seed_full_moon_dates.csv
     status:
-      - test -f full_moon_dates.csv
+      - test -f seed_full_moon_dates.csv
     desc: Download CSV file with full moon dates
 
   debug:

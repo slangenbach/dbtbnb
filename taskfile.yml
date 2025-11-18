@@ -46,6 +46,13 @@ tasks:
       - test -d data
     internal: true
 
+  install-pre-commit-hooks:
+    cmds:
+      - uv run pre-commit install
+    status:
+      - test -f .git/hooks/pre-commit
+    internal: true
+
   setup:
     cmds:
       - task: init-git-repo
@@ -55,7 +62,7 @@ tasks:
       - task: create-data-dir
       - task: dbt:get-seed-file
       - uv sync --all-groups --all-extras
-      - uv run pre-commit install
+      - task: install-pre-commit-hooks
     desc: Setup development environment
 
   setup-ci:
