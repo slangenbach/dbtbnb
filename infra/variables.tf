@@ -42,3 +42,9 @@ variable "preset_public_key_path" {
   description = "Path to public key file to authenticate with Preset with Snowflake"
   type        = string
 }
+
+variable "streamlit_main_file_path" {
+  description = "Path to Streamlit app main file"
+  type        = string
+  default     = "../src/dbtbnb/ui/app.py"
+}
