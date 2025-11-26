@@ -16,7 +16,6 @@ dependencies = [
     "dbt-core>=1.10.13",
     "dbt-snowflake>=1.10.2",
     "pydantic-settings>=2.9.1",
-    "streamlit>=1.51.0",
 ]
 
 [dependency-groups]
@@ -29,6 +28,13 @@ dev = [
     "pytest-cov>=6.0.0",
     "ty>=0.0.1a7",
     "dagster-webserver>=1.12.2",
+]
+
+ui = [
+    "httpx>=0.28.1",
+    "pydantic-settings>=2.11.0",
+    "snowflake-connector-python>=3.18.0",
+    "streamlit>=1.51.0",
 ]
 
 [tool.uv]
