@@ -16,6 +16,7 @@ class Config(BaseSettings):
     sf_user: str = "test"
     sf_authenticator: str = "SNOWFLAKE_JWT"
     sf_private_key_file_path: Path = Path("~/.ssh/id_rsa.p8")
+    sf_role: str = "test"
     sf_warehouse: str = "COMPUTE_WH"
     sf_database: str = "test"
     sf_schema: str = "test"

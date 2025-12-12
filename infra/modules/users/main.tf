@@ -192,3 +192,75 @@ resource "snowflake_grant_privileges_to_account_role" "future_objects_to_reporte
     }
   }
 }
+
+# Agent role
+resource "snowflake_account_role" "agent" {
+  name = "AGENT"
+}
+
+# Streamlit user
+resource "snowflake_service_user" "streamlit" {
+  name              = "streamlit"
+  login_name        = "streamlit"
+  rsa_public_key    = file(var.streamlit_public_key_path)
+  default_role      = snowflake_account_role.agent.name
+  default_warehouse = "COMPUTE_WH"
+  default_namespace = var.streamlit_default_namespace
+  comment           = "Streamlit user to run dashboards"
+}
+
+resource "snowflake_grant_account_role" "agent_to_streamlit" {
+  role_name = snowflake_account_role.agent.name
+  user_name = snowflake_service_user.streamlit.name
+}
+
+resource "snowflake_grant_account_role" "agent_to_sysadmin" {
+  role_name        = snowflake_account_role.agent.name
+  parent_role_name = "SYSADMIN"
+}
+
+
+# Agent grants - Cortex User role
+resource "snowflake_grant_database_role" "cortex_user_to_agent" {
+  database_role_name = "SNOWFLAKE.CORTEX_USER"
+  parent_role_name   = snowflake_account_role.agent.name
+}
+
+# Agents  grants - Warehouse
+resource "snowflake_grant_privileges_to_account_role" "warehouse_to_agent" {
+  privileges        = ["USAGE", "OPERATE"]
+  account_role_name = snowflake_account_role.agent.name
+  on_account_object {
+    object_type = "WAREHOUSE"
+    object_name = "COMPUTE_WH"
+  }
+}
+
+# Agent grants - Database
+resource "snowflake_grant_privileges_to_account_role" "database_to_agent" {
+  account_role_name = snowflake_account_role.agent.name
+  privileges        = ["USAGE"]
+  on_account_object {
+    object_type = "DATABASE"
+    object_name = var.default_db
+  }
+}
+
+# Agent grants - Schema
+resource "snowflake_grant_privileges_to_account_role" "schema_to_agent" {
+  account_role_name = snowflake_account_role.agent.name
+  privileges        = ["USAGE"]
+  on_schema {
+    schema_name = var.streamlit_default_namespace
+  }
+}
+
+# Agent grants - Semantic Model Access
+resource "snowflake_grant_privileges_to_account_role" "semantic_model_to_agent" {
+  account_role_name = snowflake_account_role.agent.name
+  privileges        = ["SELECT"]
+  on_schema_object {
+    object_type = "VIEW"
+    object_name = "${var.streamlit_default_namespace}.AIRBNB"
+  }
+}

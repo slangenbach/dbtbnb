@@ -43,6 +43,7 @@ def get_sf_connection(config: Config) -> sc.SnowflakeConnection | None:
         "user": config.sf_user,
         "authenticator": config.sf_authenticator,
         "private_key_file": config.sf_private_key_file_path.expanduser(),
+        "role": config.sf_role,
         "warehouse": config.sf_warehouse,
         "database": config.sf_database,
         "schema": config.sf_schema,
@@ -64,7 +65,10 @@ def get_cortex_analyst_response(
     with httpx.Client() as client:
         response = client.post(
             url=f"https://{conn.host}/api/v2/cortex/analyst/message",
-            headers={"Authorization": f"Snowflake Token={conn.rest.token}"},
+            headers={
+                "Authorization": f"Snowflake Token={conn.rest.token}",
+                "Content-Type": "application/json",
+            },
             json={"messages": messages, "semantic_model": semantic_model},
             timeout=60,
         )
