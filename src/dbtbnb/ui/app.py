@@ -66,6 +66,7 @@ def get_token(config: Config):
 
     logger.debug("Generating JWT")
     token = get_jwt(
+        sf_org=config.sf_org,
         sf_account=config.sf_account,
         sf_user=config.sf_user,
         sf_private_key_file_path=config.sf_private_key_file_path,
@@ -75,13 +76,8 @@ def get_token(config: Config):
     return token
 
 
-def _debug_sf_connection(conn: sc.SnowflakeConnection):
-    result = conn.cursor().execute("SELECT CURRENT_USER(), CURRENT_ROLE()").fetchone()
-    logger.debug("Connected to Snowflake with %s", result)
-
-
 def get_cortex_analyst_response(
-    conn: sc.SnowflakeConnection, token: str, messages, semantic_model: str
+    conn: sc.SnowflakeConnection, token: str, messages, semantic_view: str
 ) -> CortexAnalystResponse:
     """Get response from Snowflake Cortex Analyst."""
     logger.debug("Getting response from Cortex Analyst")
@@ -89,11 +85,11 @@ def get_cortex_analyst_response(
         response = client.post(
             url=f"https://{conn.host}/api/v2/cortex/analyst/message",
             headers={
-                "Authorization": f"Bearer: {token}",
+                "Authorization": f"Bearer {token}",
                 "Content-Type": "application/json",
                 "X-Snowflake-Authorization-Token-Type": "KEYPAIR_JWT",
             },
-            json={"messages": messages, "semantic_model": semantic_model},
+            json={"messages": messages, "semantic_view": semantic_view},
             timeout=60,
         )
         response.raise_for_status()
@@ -128,25 +124,27 @@ for message in st.session_state.messages:
 if prompt := st.chat_input("Ask me anything"):
     with st.chat_message(name="user"):
         st.markdown(prompt)
-    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.session_state.messages.append(
+        {"role": "user", "content": [{"type": "text", "text": prompt}]}
+    )
 
     with st.chat_message(name="assistant"):
         with st.spinner("Thinking..."):
             try:
                 conn = get_sf_connection(config)
                 token = get_token(config)
-                _debug_sf_connection(conn)
                 response = get_cortex_analyst_response(
                     conn=conn,  # type: ignore
                     token=token,
                     messages=st.session_state.messages,
-                    semantic_model=config.sf_semantic_model,
+                    semantic_view=config.sf_semantic_view,
                 )
                 parsed_response = parse_cortex_analyst_response(response)
 
                 st.markdown(parsed_response)
                 st.session_state.messages.append({"role": "assistant", "content": parsed_response})
 
-            except httpx.HTTPError as err:
+            except httpx.HTTPStatusError as err:
                 logger.error("Could not get response: %s", err)
+                logger.error("Error details: %s", err.response.text)
                 st.error(f"Error: Could not get response from Cortex Analyst: {err}")

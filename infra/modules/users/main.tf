@@ -11,6 +11,7 @@ locals {
   agent_database_privileges  = ["USAGE"]
   agent_schema_privileges    = ["USAGE"]
   agent_view_privileges      = ["SELECT"]
+  agent_table_privileges     = ["SELECT"]
 
   object_types = ["TABLES", "VIEWS"]
 }
@@ -267,5 +268,16 @@ resource "snowflake_grant_privileges_to_account_role" "semantic_model_to_agent" 
   on_schema_object {
     object_type = "VIEW"
     object_name = "${var.streamlit_default_namespace}.AIRBNB"
+  }
+}
+
+resource "snowflake_grant_privileges_to_account_role" "all_tables_to_agent" {
+  account_role_name = snowflake_account_role.agent.name
+  privileges        = local.agent_table_privileges
+  on_schema_object {
+    all {
+      object_type_plural = "TABLES"
+      in_schema          = var.streamlit_default_namespace
+    }
   }
 }

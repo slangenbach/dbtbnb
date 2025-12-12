@@ -20,7 +20,7 @@ class Config(BaseSettings):
     sf_warehouse: str = "COMPUTE_WH"
     sf_database: str = "test"
     sf_schema: str = "test"
-    sf_semantic_model: str = "test"
+    sf_semantic_view: str = "test"
 
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 

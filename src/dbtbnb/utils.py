@@ -36,7 +36,7 @@ def get_fingerprint(private_key_file_path: Path):
         encoding=Encoding.DER, format=PublicFormat.SubjectPublicKeyInfo
     )
 
-    hash = hashlib.sha3_256()
+    hash = hashlib.sha256()
     hash.update(public_key)
 
     fingerprint = f"SHA256:{base64.b64encode(hash.digest()).decode()}"
@@ -44,11 +44,13 @@ def get_fingerprint(private_key_file_path: Path):
     return fingerprint
 
 
-def get_jwt(sf_account: str, sf_user: str, sf_private_key_file_path: Path, fingerprint: str):
+def get_jwt(
+    sf_org: str, sf_account: str, sf_user: str, sf_private_key_file_path: Path, fingerprint: str
+):
     """Get JWT from private key."""
     now = datetime.now(tz=UTC)
     lifetime = timedelta(minutes=59)
-    qualified_user = f"{sf_account.upper()}.{sf_user.upper()}"
+    qualified_user = f"{sf_org.upper()}-{sf_account.upper()}.{sf_user.upper()}"
     payload = {
         "iss": f"{qualified_user}.{fingerprint}",
         "sub": qualified_user,
