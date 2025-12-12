@@ -1,9 +1,6 @@
 """UI."""
-# https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-analyst
-# https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-analyst#label-analyst-access-example
-# https://github.com/Snowflake-Labs/sf-samples/blob/main/samples/cortex-analyst/Advanced%20SiS%20Demo/Talk_to_your_data.py
 
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 import httpx
 import snowflake.connector as sc
@@ -30,9 +27,24 @@ class CortexAnalystResponse(BaseModel):
             type: Literal["sql"]
             statement: str
 
-        content: list[Annotated[TextContent | SQLContent, Field(discriminator="type")]]
+        class SuggestionsContent(BaseModel):  # noqa: D106
+            type: Literal["suggestions"]
+            suggestions: list[str]
+
+        content: list[
+            Annotated[TextContent | SQLContent | SuggestionsContent, Field(discriminator="type")]
+        ]
 
     message: Message
+
+
+class ParsedResponse(BaseModel):
+    """Parsed response from Cortex Analyst."""
+
+    response: str
+    text: str
+    sql: str | None
+    suggestions: str | None
 
 
 @st.cache_resource
@@ -97,18 +109,55 @@ def get_cortex_analyst_response(
         return CortexAnalystResponse(**response.json())
 
 
-def parse_cortex_analyst_response(response_data: CortexAnalystResponse) -> str:
+def parse_cortex_analyst_response(response_data: CortexAnalystResponse) -> ParsedResponse:
     """Parse Snowflake Cortex Analyst response."""
     full_response = ""
+    text = ""
+    sql = ""
+    suggestions = ""
 
     logger.debug("Parsing response")
     for item in response_data.message.content:
-        if item.type == "text":
-            full_response += item.text + "\n\n"
-        elif item.type == "sql":
-            full_response += f"```sql\n{item.statement}\n```\n\n"
+        match item.type:
+            case "text":
+                full_response += item.text + "\n\n"
+                text += item.text
+            case "sql":
+                full_response += f"```sql\n{item.statement}\n```\n\n"
+                sql += item.statement
+            case "suggestion":
+                suggestions = "\n".join(f"-{s}" for s in item.suggestions)
+                full_response += f"Suggestions:\n{suggestions}\n\n"
 
-    return full_response.strip()
+    return ParsedResponse(
+        response=full_response.strip(), text=text, sql=sql, suggestions=suggestions
+    )
+
+
+def execute_query(conn: sc.SnowflakeConnection, sql: str):
+    """Execute SQL query."""
+    cursor = conn.cursor()
+    logger.debug("Executing query")
+    cursor.execute(sql)
+    logger.debug("Fetching results")
+    df = cursor.fetch_pandas_all()
+    logger.debug("Result contains %s rows and %s cols", df.shape[0], df.shape[1])
+
+    return df
+
+
+def format_parsed_response_for_history(parsed_response: ParsedResponse) -> dict[str, Any]:
+    """Format parsed response for message history."""
+    result = {
+        "role": "analyst",
+        "content": [
+            {"type": "text", "text": parsed_response.text},
+        ],
+    }
+    if parsed_response.sql:
+        result["content"].append({"type": "sql", "statement": parsed_response.sql})
+
+    return result
 
 
 st.title("dbtbnb analyzer")
@@ -140,9 +189,17 @@ if prompt := st.chat_input("Ask me anything"):
                     semantic_view=config.sf_semantic_view,
                 )
                 parsed_response = parse_cortex_analyst_response(response)
+                st.markdown("### Response")
+                st.markdown(parsed_response.response)
 
-                st.markdown(parsed_response)
-                st.session_state.messages.append({"role": "assistant", "content": parsed_response})
+                if parsed_response.sql:
+                    result = execute_query(conn=conn, sql=parsed_response.sql)  # type: ignore
+                    st.markdown("### Result")
+                    st.dataframe(result)
+
+                formatted_response = format_parsed_response_for_history(parsed_response)
+                logger.debug(formatted_response)
+                st.session_state.messages.append(formatted_response)
 
             except httpx.HTTPStatusError as err:
                 logger.error("Could not get response: %s", err)
