@@ -7,6 +7,11 @@ locals {
   reporter_database_privileges  = ["USAGE"]
   reporter_schema_privileges    = ["USAGE"]
 
+  agent_warehouse_privileges = ["USAGE", "OPERATE"]
+  agent_database_privileges  = ["USAGE"]
+  agent_schema_privileges    = ["USAGE"]
+  agent_view_privileges      = ["SELECT"]
+
   object_types = ["TABLES", "VIEWS"]
 }
 
@@ -228,7 +233,7 @@ resource "snowflake_grant_database_role" "cortex_user_to_agent" {
 
 # Agents  grants - Warehouse
 resource "snowflake_grant_privileges_to_account_role" "warehouse_to_agent" {
-  privileges        = ["USAGE", "OPERATE"]
+  privileges        = local.agent_warehouse_privileges
   account_role_name = snowflake_account_role.agent.name
   on_account_object {
     object_type = "WAREHOUSE"
@@ -239,7 +244,7 @@ resource "snowflake_grant_privileges_to_account_role" "warehouse_to_agent" {
 # Agent grants - Database
 resource "snowflake_grant_privileges_to_account_role" "database_to_agent" {
   account_role_name = snowflake_account_role.agent.name
-  privileges        = ["USAGE"]
+  privileges        = local.agent_database_privileges
   on_account_object {
     object_type = "DATABASE"
     object_name = var.default_db
@@ -249,7 +254,7 @@ resource "snowflake_grant_privileges_to_account_role" "database_to_agent" {
 # Agent grants - Schema
 resource "snowflake_grant_privileges_to_account_role" "schema_to_agent" {
   account_role_name = snowflake_account_role.agent.name
-  privileges        = ["USAGE"]
+  privileges        = local.agent_schema_privileges
   on_schema {
     schema_name = var.streamlit_default_namespace
   }
@@ -258,7 +263,7 @@ resource "snowflake_grant_privileges_to_account_role" "schema_to_agent" {
 # Agent grants - Semantic Model Access
 resource "snowflake_grant_privileges_to_account_role" "semantic_model_to_agent" {
   account_role_name = snowflake_account_role.agent.name
-  privileges        = ["SELECT"]
+  privileges        = local.agent_view_privileges
   on_schema_object {
     object_type = "VIEW"
     object_name = "${var.streamlit_default_namespace}.AIRBNB"

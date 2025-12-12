@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 from dbtbnb.config import Config, get_config
 from dbtbnb.logger import get_logger
+from dbtbnb.utils import get_fingerprint, get_jwt
 
 config = get_config()
 logger = get_logger(__name__)
@@ -57,8 +58,30 @@ def get_sf_connection(config: Config) -> sc.SnowflakeConnection | None:
         st.stop()
 
 
+@st.cache_resource
+def get_token(config: Config):
+    """Get token to authenticate with Snowflake."""
+    logger.debug("Generating fingerprint")
+    fingerprint = get_fingerprint(config.sf_private_key_file_path)
+
+    logger.debug("Generating JWT")
+    token = get_jwt(
+        sf_account=config.sf_account,
+        sf_user=config.sf_user,
+        sf_private_key_file_path=config.sf_private_key_file_path,
+        fingerprint=fingerprint,
+    )
+
+    return token
+
+
+def _debug_sf_connection(conn: sc.SnowflakeConnection):
+    result = conn.cursor().execute("SELECT CURRENT_USER(), CURRENT_ROLE()").fetchone()
+    logger.debug("Connected to Snowflake with %s", result)
+
+
 def get_cortex_analyst_response(
-    conn: sc.SnowflakeConnection, messages, semantic_model: str
+    conn: sc.SnowflakeConnection, token: str, messages, semantic_model: str
 ) -> CortexAnalystResponse:
     """Get response from Snowflake Cortex Analyst."""
     logger.debug("Getting response from Cortex Analyst")
@@ -66,8 +89,9 @@ def get_cortex_analyst_response(
         response = client.post(
             url=f"https://{conn.host}/api/v2/cortex/analyst/message",
             headers={
-                "Authorization": f"Snowflake Token={conn.rest.token}",
+                "Authorization": f"Bearer: {token}",
                 "Content-Type": "application/json",
+                "X-Snowflake-Authorization-Token-Type": "KEYPAIR_JWT",
             },
             json={"messages": messages, "semantic_model": semantic_model},
             timeout=60,
@@ -110,8 +134,11 @@ if prompt := st.chat_input("Ask me anything"):
         with st.spinner("Thinking..."):
             try:
                 conn = get_sf_connection(config)
+                token = get_token(config)
+                _debug_sf_connection(conn)
                 response = get_cortex_analyst_response(
                     conn=conn,  # type: ignore
+                    token=token,
                     messages=st.session_state.messages,
                     semantic_model=config.sf_semantic_model,
                 )
