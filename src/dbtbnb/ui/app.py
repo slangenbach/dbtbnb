@@ -3,17 +3,18 @@
 # https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-analyst#label-analyst-access-example
 # https://github.com/Snowflake-Labs/sf-samples/blob/main/samples/cortex-analyst/Advanced%20SiS%20Demo/Talk_to_your_data.py
 
-from typing import Literal
+from typing import Annotated, Literal
 
 import httpx
 import snowflake.connector as sc
 import streamlit as st
 from pydantic import BaseModel, Field
-from snowflake.connector.errors import Error as SFError
 
-from ..config import Config, get_config
+from dbtbnb.config import Config, get_config
+from dbtbnb.logger import get_logger
 
 config = get_config()
+logger = get_logger(__name__)
 
 
 class CortexAnalystResponse(BaseModel):
@@ -28,35 +29,43 @@ class CortexAnalystResponse(BaseModel):
             type: Literal["sql"]
             statement: str
 
-        content: list[TextContent | SQLContent] = Field(..., discriminator="type")
+        content: list[Annotated[TextContent | SQLContent, Field(discriminator="type")]]
 
     message: Message
 
 
 @st.cache_resource
-def get_sf_connection(config: Config) -> sc.SnowflakeConnection:
+def get_sf_connection(config: Config) -> sc.SnowflakeConnection | None:
     """Get Snowflake connection."""
+    logger.debug("Connecting to Snowflake")
     params = {
-        "account": config.sf_account,
+        "account": f"{config.sf_org}-{config.sf_account}",
         "user": config.sf_user,
         "authenticator": config.sf_authenticator,
-        "private_key_file": config.sf_private_key_file_path,
+        "private_key_file": config.sf_private_key_file_path.expanduser(),
         "warehouse": config.sf_warehouse,
         "database": config.sf_database,
         "schema": config.sf_schema,
     }
-    conn = sc.connect(**params)
+    try:
+        conn = sc.connect(**params)
+        return conn
+    except sc.errors.Error as err:
+        logger.error("Could not connect to database: %s", err)
+        st.error(f"Could not connect to database: {err}")
+        st.stop()
 
-    return conn
 
-
-def get_cortex_analyst_response(conn: sc.SnowflakeConnection, messages) -> CortexAnalystResponse:
+def get_cortex_analyst_response(
+    conn: sc.SnowflakeConnection, messages, semantic_model: str
+) -> CortexAnalystResponse:
     """Get response from Snowflake Cortex Analyst."""
+    logger.debug("Getting response from Cortex Analyst")
     with httpx.Client() as client:
         response = client.post(
             url=f"https://{conn.host}/api/v2/cortex/analyst/message",
             headers={"Authorization": f"Snowflake Token={conn.rest.token}"},
-            json={"messages": messages},
+            json={"messages": messages, "semantic_model": semantic_model},
             timeout=60,
         )
         response.raise_for_status()
@@ -68,6 +77,7 @@ def parse_cortex_analyst_response(response_data: CortexAnalystResponse) -> str:
     """Parse Snowflake Cortex Analyst response."""
     full_response = ""
 
+    logger.debug("Parsing response")
     for item in response_data.message.content:
         if item.type == "text":
             full_response += item.text + "\n\n"
@@ -97,12 +107,15 @@ if prompt := st.chat_input("Ask me anything"):
             try:
                 conn = get_sf_connection(config)
                 response = get_cortex_analyst_response(
-                    conn=conn, messages=st.session_state.messages
+                    conn=conn,  # type: ignore
+                    messages=st.session_state.messages,
+                    semantic_model=config.sf_semantic_model,
                 )
                 parsed_response = parse_cortex_analyst_response(response)
 
                 st.markdown(parsed_response)
                 st.session_state.messages.append({"role": "assistant", "content": parsed_response})
 
-            except SFError as err:
+            except httpx.HTTPError as err:
+                logger.error("Could not get response: %s", err)
                 st.error(f"Error: Could not get response from Cortex Analyst: {err}")

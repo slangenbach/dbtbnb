@@ -11,13 +11,15 @@ class Config(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env")
 
+    sf_org: str = "test"
     sf_account: str = "test"
     sf_user: str = "test"
     sf_authenticator: str = "SNOWFLAKE_JWT"
-    sf_private_key_file_path: Path = Path("~/.ssh/sf.p8")
+    sf_private_key_file_path: Path = Path("~/.ssh/id_rsa.p8")
     sf_warehouse: str = "COMPUTE_WH"
-    sf_database: str = "AIRBNB"
-    sf_schema: str = "DEV"
+    sf_database: str = "test"
+    sf_schema: str = "test"
+    sf_semantic_model: str = "test"
 
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 
