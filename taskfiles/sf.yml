@@ -16,6 +16,14 @@ tasks:
         - name: KEY_NAME
     desc: Create key pair for authentication in Snowflake
 
+  create-user-keypairs:
+    cmds:
+      - for: [dbt, preset, snowflake_terraform, streamlit]
+        task: create-keypair
+        vars:
+          KEY_NAME: "{{.ITEM}}"
+    desc: Create key pairs for Snowflake users
+
   create-tf-user:
     dir: infra/scripts/
     cmd: |

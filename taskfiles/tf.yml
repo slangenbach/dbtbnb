@@ -1,0 +1,11 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  apply:
+    dir: infra
+    cmds:
+      - terraform plan -out="tfplan"
+      - terraform apply "tfplan"
+    desc: Apply Terraform changes
