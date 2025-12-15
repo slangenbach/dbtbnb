@@ -4,7 +4,11 @@
 
 Learning DBT by transforming Airbnb data.
 
-This repository implements data pipelines via dbt outlined in the [dbt bootcamp][6] course, but it does not stop there. It also includes Terraform code to deploy and configure the required Snowflake resources, a Streamlit app to analyze Airbnb data via Snowflake [Cortex Analyst][7] and helper tasks to make it easy to get going.
+This repository implements data pipelines via dbt outlined in the [dbt bootcamp][6] course, but it does not stop there. It also includes Terraform code to deploy and configure the required Snowflake resources, a Streamlit app to analyze Airbnb data via Snowflake [Cortex Analyst][7] and helper tasks to make it easy to get started.
+
+Here is screenshot of the Streamlit app:
+
+![dbtanalyzer](assets/ui.png)
 
 ## Prerequisites
 
@@ -50,7 +54,7 @@ Edit **terraform.tfvars** file int the __infra__ directory and set the following
 
 ### Analytics
 
-Edit the **profiles.yml** file int he __analytics__ directory and provide the following values:
+Edit the **profiles.yml** file int he __analytics__ directory and provide actual values for the placeholders __SNOWFLAKE_ACCOUNT_NAME__ and __FULL_PATH_TO_YOUR_PRIVATE_KEY__
 
 ### Application
 
@@ -80,13 +84,19 @@ Edit the **.env** file in project __root__ directory and set the following varia
 1. Get the Snowflake connection string: `task preset:get-connection-string`
 1. Get the auth snippet: `task preset:get-auth-snippet`
 
-### Running the UI
+### Running the UI locally
 
 1. Start the UI via `task dev:start-ui`
 
 ## Limitations
 
+### Creation of semantic view for Cortex Analyst
+
 Creation of [semantic views][9] required to analyze data by Snowflake Cortex Analyst is not yet automated. Follow the [documentation][10] to create a view via the UI instead.
+
+### Running Streamlit app in Snowflake (SiS)
+
+Running the Streamlit app in Snowflake is not yet implemented.
 
 ## Troubleshooting
 
