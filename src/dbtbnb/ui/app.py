@@ -64,7 +64,7 @@ def get_sf_connection(config: Config) -> sc.SnowflakeConnection | None:
     try:
         conn = sc.connect(**params)
         return conn
-    except sc.errors.Error as err:
+    except sc.errors.Error as err:  # type: ignore[unresolved-attribute]
         logger.error("Could not connect to database: %s", err)
         st.error(f"Could not connect to database: {err}")
         st.stop()
@@ -120,11 +120,11 @@ def parse_cortex_analyst_response(response_data: CortexAnalystResponse) -> Parse
     for item in response_data.message.content:
         match item.type:
             case "text":
-                full_response += item.text + "\n\n"
+                full_response += item.text + "\n\n"  # type: ignore[possibly-missing-attribute]
                 text += item.text
             case "sql":
-                full_response += f"```sql\n{item.statement}\n```\n\n"
-                sql += item.statement
+                full_response += f"```sql\n{item.statement}\n```\n\n"  # type: ignore[possibly-missing-attribute]
+                sql += item.statement  # type: ignore[possibly-missing-attribute]
             case "suggestion":
                 suggestions = "\n".join(f"-{s}" for s in item.suggestions)
                 full_response += f"Suggestions:\n{suggestions}\n\n"
@@ -137,8 +137,10 @@ def parse_cortex_analyst_response(response_data: CortexAnalystResponse) -> Parse
 def execute_query(conn: sc.SnowflakeConnection, sql: str):
     """Execute SQL query."""
     cursor = conn.cursor()
+
     logger.debug("Executing query")
     cursor.execute(sql)
+
     logger.debug("Fetching results")
     df = cursor.fetch_pandas_all()
     logger.debug("Result contains %s rows and %s cols", df.shape[0], df.shape[1])
@@ -155,7 +157,7 @@ def format_parsed_response_for_history(parsed_response: ParsedResponse) -> dict[
         ],
     }
     if parsed_response.sql:
-        result["content"].append({"type": "sql", "statement": parsed_response.sql})
+        result["content"].append({"type": "sql", "statement": parsed_response.sql})  # type: ignore[possibly-missing-attribute]
 
     return result
 
