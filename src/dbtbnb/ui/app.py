@@ -121,7 +121,7 @@ def parse_cortex_analyst_response(response_data: CortexAnalystResponse) -> Parse
         match item.type:
             case "text":
                 full_response += item.text + "\n\n"  # type: ignore[possibly-missing-attribute]
-                text += item.text
+                text += item.text  # type: ignore[possibly-missing-attribute]
             case "sql":
                 full_response += f"```sql\n{item.statement}\n```\n\n"  # type: ignore[possibly-missing-attribute]
                 sql += item.statement  # type: ignore[possibly-missing-attribute]
