@@ -60,6 +60,6 @@ def get_jwt(
     logger.debug("Payload for JWT is: %s", payload)
     private_key = _load_private_key(sf_private_key_file_path)
 
-    token = jwt.encode(payload, key=private_key, algorithm="RS256")
+    token = jwt.encode(payload, key=private_key, algorithm="RS256")  # type: ignore[invalid-argument-type]
 
     return token
