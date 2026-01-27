@@ -2,7 +2,11 @@
 
 ![CI](https://github.com/slangenbach/dbtbnb/actions/workflows/ci.yml/badge.svg)
 
+![Logo](assets/logo.png)
+
 Learning DBT by transforming Airbnb data.
+
+## About
 
 This repository implements data pipelines via dbt outlined in the [dbt bootcamp][6] course, but it does not stop there. It also includes Terraform code to deploy and configure the required Snowflake resources, a Streamlit app to analyze Airbnb data via Snowflake [Cortex Analyst][7] and helper tasks to make it easy to get started.
 
